@@ -56,11 +56,13 @@ async function main(includePosts: boolean) {
     `Users: ${user1.name} (${user1.posts.length} post) and ${user2.name} (${user2.posts.length} posts) `,
   );
 
-  const users = await prisma.user.findMany(includePosts ? {
+  const userFindManyArgs: Prisma.Args<typeof prisma.user, "findMany"> = includePosts ? {
     include: {
       posts: true
     }
-  } : undefined);
+  } : {}
+
+  const users = await prisma.user.findMany(userFindManyArgs);
 
   if (includePosts) {
     console.log("Posts are included in the users prisma payload.");
@@ -70,7 +72,7 @@ async function main(includePosts: boolean) {
   } else {
     console.log("Posts are NOT included in the users prisma payload.");
     users.forEach(user => {
-      console.log(user.posts);
+      console.log(user.posts)
     })
   }
 }
