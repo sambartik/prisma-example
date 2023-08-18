@@ -56,23 +56,35 @@ async function main(includePosts: boolean) {
     `Users: ${user1.name} (${user1.posts.length} post) and ${user2.name} (${user2.posts.length} posts) `,
   );
 
-  const users = await prisma.user.findMany(includePosts ? {
+  const sharedArgs: Prisma.UserFindManyArgs = {};
+  const withoutPostsArgs = {
+    ...sharedArgs,
+    // Could also add additional arguments, special when without posts...
+    // .
+    // .
+  } satisfies Prisma.UserFindManyArgs;
+  const withPostsArgs = {
+    ...sharedArgs,
     include: {
-      posts: true
-    }
-  } : undefined);
+      posts: true,
+    },
+    // Could add another additional arguments, special when with posts...
+    // .
+    // .
+  } satisfies Prisma.UserFindManyArgs;
 
-  if (includePosts) {
-    console.log("Posts are included in the users prisma payload.");
-    users.forEach(user => {
+  const users: (
+    | Prisma.UserGetPayload<typeof withPostsArgs>
+    | Prisma.UserGetPayload<typeof withoutPostsArgs>
+  )[] = await prisma.user.findMany(includePosts ? withPostsArgs : withoutPostsArgs);
+
+  users.forEach((user) => {
+    if ("posts" in user) {
       console.log(user.posts);
-    });
-  } else {
-    console.log("Posts are NOT included in the users prisma payload.");
-    users.forEach(user => {
+    } else {
       console.log(user.posts);
-    })
-  }
+    }
+  });
 }
 
 main(false)
